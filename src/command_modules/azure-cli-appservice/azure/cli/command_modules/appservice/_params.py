@@ -67,6 +67,9 @@ register_cli_argument('appservice plan update', 'allow_pending_state', ignore_ty
 register_cli_argument('appservice plan', 'number_of_workers', help='Number of workers to be allocated.', type=int, default=1)
 register_cli_argument('appservice plan', 'admin_site_name', help='The name of the admin web app.')
 
+register_cli_argument('appservice plan apps list', 'name', options_list=('--name', '-n'), help="Name of the app service plan", completer=None)
+register_cli_argument('appservice plan apps list', 'resource_group_name', arg_type=resource_group_name_type)
+
 register_cli_argument('webapp', 'resource_group_name', arg_type=resource_group_name_type)
 register_cli_argument('webapp', 'location', arg_type=location_type)
 
@@ -86,6 +89,9 @@ register_cli_argument('webapp create', 'plan', options_list=('--plan', '-p'), co
                       help="name or resource id of the app service plan. Use 'appservice plan create' to get one")
 
 register_cli_argument('webapp browse', 'logs', options_list=('--logs', '-l'), action='store_true', help='Enable viewing the log stream immediately after launching the web app')
+register_cli_argument('webapp delete', 'keep_empty_plan', action='store_true', help='keep empty app service plan')
+register_cli_argument('webapp delete', 'keep_metrics', action='store_true', help='keep app metrics')
+register_cli_argument('webapp delete', 'keep_dns_registration', action='store_true', help='keep DNS registration')
 
 for scope in ['webapp', 'functionapp']:
     register_cli_argument(scope + ' config ssl bind', 'ssl_type', help='The ssl cert type', **enum_choice_list(['SNI', 'IP']))
@@ -145,7 +151,7 @@ register_cli_argument('webapp config connection-string', 'connection_string_type
                       options_list=('--connection-string-type', '-t'), help='connection string type', **enum_choice_list(ConnectionStringType))
 
 register_cli_argument('webapp config container', 'docker_registry_server_url', options_list=('--docker-registry-server-url', '-r'), help='the container registry server url')
-register_cli_argument('webapp config container', 'docker_custom_image_name', options_list=('--docker-custom-image-name', '-c'), help='the container custom image name and optionally the tag name')
+register_cli_argument('webapp config container', 'docker_custom_image_name', options_list=('--docker-custom-image-name', '-c', '-i'), help='the container custom image name and optionally the tag name')
 register_cli_argument('webapp config container', 'docker_registry_server_user', options_list=('--docker-registry-server-user', '-u'), help='the container registry server username')
 register_cli_argument('webapp config container', 'docker_registry_server_password', options_list=('--docker-registry-server-password', '-p'), help='the container registry server password')
 

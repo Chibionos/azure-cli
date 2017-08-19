@@ -98,6 +98,39 @@ class WebappBasicE2ETest(ResourceGroupVCRTestBase):
         ])
 
 
+class AppServicePlanAppsScenarioTest(ResourceGroupVCRTestBase):
+    def __init__(self, test_method):
+        super(AppServicePlanAppsScenarioTest, self).__init__(__file__, test_method, resource_group='azurecli-appservice-apps')
+        self.plan = 'apps-in-asp-test-plan'
+        self.webapp_1 = 'apps-in-asp-test-app1'
+        self.webapp_2 = 'apps-in-asp-test-app2'
+
+    def test_appservice_plan_apps_end_to_end(self):
+        self.execute()
+
+    def set_up(self):
+        super(AppServicePlanAppsScenarioTest, self).set_up()
+        self.cmd('appservice plan create -g {} -n {}' .format(self.resource_group, self.plan))
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(self.resource_group, self.webapp_1, self.plan))
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(self.resource_group, self.webapp_2, self.plan))
+
+    def body(self):
+        result = self.cmd('appservice plan apps list -g {} -n {}'.format(self.resource_group, self.plan));
+        self.assertEqual(set([x['name'] for x in result]), set([self.webapp_1, self.webapp_2]))
+
+        result = self.cmd('appservice plan apps restart -g {} -n {}'.format(self.resource_group, self.plan));
+        self.assertEqual(set([x['state'] for x in result]), set(["Running"]))
+
+        result = self.cmd('appservice plan apps stop -g {} -n {}'.format(self.resource_group, self.plan));
+        self.assertEqual(set([x['state'] for x in result]), set(["Stopped"]))
+
+        result = self.cmd('appservice plan apps start -g {} -n {}'.format(self.resource_group, self.plan));
+        self.assertEqual(set([x['state'] for x in result]), set(["Running"]))
+
+        self.cmd('appservice plan delete -g {} -n {}' .format(self.resource_group, self.plan))
+        self.cmd('webapp delete -g {} -n {} --plan {}'.format(self.resource_group, self.webapp_1, self.plan))
+        self.cmd('webapp delete -g {} -n {} --plan {}'.format(self.resource_group, self.webapp_2, self.plan))
+
 class WebappQuickCreateTest(ScenarioTest):
     @ResourceGroupPreparer()
     def test_win_webapp_quick_create(self, resource_group):
@@ -356,7 +389,7 @@ class WebappACRSceanrioTest(ScenarioTest):
                 JMESPathCheckV2("[?name=='DOCKER_REGISTRY_SERVER_USERNAME']|[0].value", creds['username'])
         ])
 
-
+        
 class WebappGitScenarioTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
         super(WebappGitScenarioTest, self).__init__(__file__, test_method, resource_group='cli-webapp-git4')
@@ -384,7 +417,6 @@ class WebappGitScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('webapp deployment source delete -g {} -n {}'.format(self.resource_group, webapp), checks=[
             JMESPathCheck('repoUrl', None)
         ])
-
 
 class WebappSlotScenarioTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
@@ -492,7 +524,6 @@ class WebappSlotSwapScenarioTest(ScenarioTest):
         self.cmd('webapp config appsettings list -g {} -n {} --slot {}'.format(resource_group, webapp, slot), checks=[
             JMESPathCheckV2("[?name=='s1']|[0]", None)
         ])
-
 
 class WebappSSLCertTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
